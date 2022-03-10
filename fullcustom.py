@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import time
 import math
+import subprocess
 
 def dist(p1, p2):
     return math.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
@@ -128,10 +129,20 @@ while True:
     if hand[4] < 4:
         if hand[6] == [False, True, True, True, True]:
             #print("audio")
-            if 10 > abs(hand[8]) > 1:
+            if -10 < hand[8] < -1:
                 #print(hand[8])
-                print("chnagevol")
-        if hand[6] == [False, False, True, True, True]:
+                print("decrease")
+                print(str(int(hand[8])))
+                subprocess.run(["pamixer", "-d", str(int(abs(hand[8])))])
+
+            if 10 > hand[8] > 1:
+                #print(hand[8])
+                print("increase")
+                print(str(int(hand[8])))
+                subprocess.run(["pamixer", "-i", str(int(hand[8]))])
+
+   
+        """if hand[6] == [False, False, True, True, True]:
             if 16 > hand[8] > 1 or -1 > hand[8] > -16:
                 workspace[i] += hand[8]
             #print()
@@ -160,7 +171,7 @@ while True:
         #pagedown[i] = False
         #pageup[i] = False
         workspace[i] = 0
-
+    """
 
     fps = (1/frametime)
     cv2.putText(img,str(int(fps)), (10,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 1)
