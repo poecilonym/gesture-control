@@ -2,30 +2,11 @@ import cv2
 import mediapipe as mp
 import time
 import math
-import subprocess
-import threading
-
-def wait_1():
-    global wait
-    time.sleep(1)
-    wait = False
-
-
-wait_thread = threading.Thread(target=wait_1, name="Waiter")
 
 def dist(p1, p2):
     return math.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
 
-wait = False
-#get capture device
-try:
-    cap = cv2.VideoCapture(0)
-    success, img = cap.read()
-    h, w, c = img.shape
-    d = (h+w)/2
-except:
-    print("could not get a capture device, check if your webcam is plugged in")
-    exit(0)
+
 
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(static_image_mode=False,
@@ -34,32 +15,19 @@ hands = mpHands.Hands(static_image_mode=False,
                       min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
 
-ptime = 0
-ctime = 0
-pTime = 0
-cTime = 0
-
 handlist=[[1,1,0,0,1,{},[],0,0], [1,1,0,0,1,{},[],0,0]]
 
-#success, img = cap.read()
-#h, w, c = img.shape
-#d = (h+w)/2
 
 workspace = [0, 0]
 pageup = [False, False]
 pagedown = [False, False]
 handopen = [0, 0]
 
-while True:
+def parse(img, handlist):
     #print("begin====================")
-    success, img = cap.read()
     img = cv2.flip(img, 1)
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(imgRGB)
-    ctime = time.time()
-    frametime = (ctime-ptime)
-    #print(frametime)
-    ptime = ctime
     #print(results.multi_hand_landmarks)
     #print("\n\n\n\n")
     i = 0
@@ -140,73 +108,3 @@ while True:
         #print(handlist)
     #print(handlist)
     #print()
-    i = 0
-    print(wait)
-    print(wait_thread.is_alive())
-    hand = handlist[1]
-    if hand[4] < 4:
-        if hand[6] == [False, True, True, True, True]:
-            #print("audio")
-            if -10 < hand[8] < -1:
-                #print(hand[8])
-                print("decrease")
-                print(str(int(hand[8])))
-                subprocess.run(["pamixer", "-d", str(int(abs(hand[8])))])
-
-            if 10 > hand[8] > 1:
-                #print(hand[8])
-                print("increase")
-                print(str(int(hand[8])))
-                subprocess.run(["pamixer", "-i", str(int(hand[8]))])
-        if hand[6] == [False, False, True, True, True] and wait == False:
-            print("left right")
-            if hand[8] > 10:
-                print("right")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "106:1", "106:0"])
-                subprocess.run(["notify-send", "helloo"])
-                wait = True
-                wait_thread = threading.Thread(target=wait_1, name="Waiter")
-                wait_thread.start()
-            if hand[8] < -10:
-                print("left")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "105:1", "105:0"])
-                wait = True
-                wait_thread = threading.Thread(target=wait_1, name="Waiter")
-                wait_thread.start()
-   
-        """if hand[6] == [False, False, True, True, True]:
-            if 16 > hand[8] > 1 or -1 > hand[8] > -16:
-                workspace[i] += hand[8]
-            #print()
-            #print(i)
-            #print(str(hand[8])+"   "+str(workspace[i]))
-            #print(str(pageup[i])+" "+str(pagedown[i]))
-            if workspace[i] > 35 and not pageup[i]:
-                #print("up==============================================")
-                workspace[i] = 0
-                pageup[i] = True
-            if workspace[i] < -35 and not pagedown[i]:
-                #print("down============================================")
-                workspace[i] = 0
-                pagedown[i] = True
-        if hand[6] == [False, False, False, False, False]:
-            handopen[i] += 1
-            #print("open")
-            if handopen[i] > 5:
-                #print("REsertttttttttttttttttttttttttttttttttt")
-                workspace[i] = 0
-                handopen[i] = 0
-                pagedown[i] = False
-                pageup[i] = False
-    else:
-        #print("resresresresresres"+str(i))
-        #pagedown[i] = False
-        #pageup[i] = False
-        workspace[i] = 0
-    """
-
-    fps = (1/frametime)
-    cv2.putText(img,str(int(fps)), (10,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 1)
-    #print(fps)
-    cv2.imshow("Image", img)
-    cv2.waitKey(1)
