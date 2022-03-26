@@ -10,13 +10,20 @@ def wait_1():
     time.sleep(1)
     wait = False
 
+def wait_m_finger():
+    global m_finger
+    time.sleep(1)
+    if m_finger == True:
+        subprocess.run(["notify-send", "middle_finger"])
 
 wait_thread = threading.Thread(target=wait_1, name="Waiter")
+finger_thread = threading.Thread(target=wait_m_finger, name="finger Waiter")
 
 def dist(p1, p2):
     return math.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2+(p1[2]-p2[2])**2)
 
 wait = False
+m_finger = False
 #get capture device
 try:
     cap = cv2.VideoCapture(0)
@@ -141,8 +148,8 @@ while True:
     #print(handlist)
     #print()
     i = 0
-    print(wait)
-    print(wait_thread.is_alive())
+    #print(wait)
+    #print(wait_thread.is_alive())
     hand = handlist[1]
     if hand[4] < 4:
         if hand[6] == [False, True, True, True, True]:
@@ -163,7 +170,7 @@ while True:
             if hand[8] > 10:
                 print("right")
                 subprocess.run(["sudo", "ydotool", "key", "-d", "5", "106:1", "106:0"])
-                subprocess.run(["notify-send", "helloo"])
+                #subprocess.run(["notify-send", "helloo"])
                 wait = True
                 wait_thread = threading.Thread(target=wait_1, name="Waiter")
                 wait_thread.start()
@@ -173,7 +180,16 @@ while True:
                 wait = True
                 wait_thread = threading.Thread(target=wait_1, name="Waiter")
                 wait_thread.start()
-   
+        if hand[6] == [False, True, False, True, True]:
+            print("middle finger")
+            m_finger = True
+            if not finger_thread.is_alive():
+                finger_thread = threading.Thread(target=wait_m_finger, name="finger Waiter")
+                finger_thread.start()
+        if not hand[6] == [False, True, False, True, True]:
+            m_finger = False 
+        
+
         """if hand[6] == [False, False, True, True, True]:
             if 16 > hand[8] > 1 or -1 > hand[8] > -16:
                 workspace[i] += hand[8]
