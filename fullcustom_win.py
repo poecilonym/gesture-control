@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import time
 import math
-import subprocess
+import pyautogui
 import threading
 
 def wait_1():
@@ -22,8 +22,11 @@ def wait_1_ws():
 def wait_m_finger():
     global m_finger
     time.sleep(1)
+    print("knkjbkjbkj")
     if m_finger == True:
-        subprocess.run(["notify-send", "middle_finger"])
+        print("lmomomo")
+        #pyautogui.hotkey("ctrl", "shift", "o")
+        pyautogui.hotkey("o")
 
 wait_thread = threading.Thread(target=wait_1, name="Waiter")
 wait_ws_thread = threading.Thread(target=wait_1_ws, name="WS Waiter")
@@ -173,20 +176,17 @@ while True:
                 if hand[8] > 0:
                     change = "+"+change
                 print(change)
-                subprocess.run(["sudo", "xbacklight", "-ctrl", "intel_backlight", change])
         if hand[6] == [False, True, True, True, True]:
             #print("audio")
             if -10 < hand[8] < -1:
                 #print(hand[8])
                 print("decrease")
                 print(str(int(hand[8])))
-                subprocess.run(["pamixer", "-d", str(int(abs(hand[8])))])
 
             if 10 > hand[8] > 1:
                 #print(hand[8])
                 print("increase")
                 print(str(int(hand[8])))
-                subprocess.run(["pamixer", "-i", str(int(hand[8]))])
         if hand[6] == [False, False, False, True, True] and wait == False:
             #print("left right")
             if 16 > hand[8] > 4 or -4 > hand[8] > -16:
@@ -194,27 +194,25 @@ while True:
             print(swipe[i])
             if swipe[i] > 30:
                 print("right")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "106:1", "106:0"])
                 #subprocess.run(["notify-send", "helloo"])
                 wait = True
                 wait_thread = threading.Thread(target=wait_1, name="Waiter")
                 wait_thread.start()
             if swipe[i] < -30:
                 print("left")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "105:1", "105:0"])
                 wait = True
                 wait_thread = threading.Thread(target=wait_1, name="Waiter")
                 wait_thread.start()
         if not hand[6] == [False, False, False, True, True]:
             swipe[i] = 0
-        if hand[6] == [False, True, False, True, True]:
+        if hand[6] == [True, True, False, True, True]:
             print("middle finger")
             m_finger = True
             if not finger_thread.is_alive():
                 finger_thread = threading.Thread(target=wait_m_finger, name="finger Waiter")
                 finger_thread.start()
-        if not hand[6] == [False, True, False, True, True]:
-            m_finger = False 
+        if not hand[6] == [True, True, False, True, True]:
+            m_finger = False
         if hand[6] == [False, False, True, True, True] and wait == False:
             #print("workspace")
             if 16 > hand[8] > 4 or -4 > hand[8] > -16:
@@ -222,14 +220,12 @@ while True:
             print(workspace[i])
             if workspace[i] > 30:
                 print("right")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "106:1", "106:0"])
                 #subprocess.run(["notify-send", "helloo"])
                 ws_wait = True
                 wait_ws_thread = threading.Thread(target=wait_1_ws, name="WS Waiter")
                 wait_ws_thread.start()
             if workspace[i] < -30:
                 print("left")
-                subprocess.run(["sudo", "ydotool", "key", "-d", "5", "105:1", "105:0"])
                 ws_wait = True
                 wait_ws_thread = threading.Thread(target=wait_1_ws, name="WS Waiter")
                 wait_ws_thread.start()
